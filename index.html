@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10120f">
+<title>PACE — Run your own race</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+:root{--bg:#0d0f0c;--panel:#171a16;--panel2:#20241e;--line:#2b3028;--text:#f3f5ef;--muted:#92998d;--lime:#c6f36a;--lime2:#a8d84d;--red:#ff746d;--radius:22px}
+*{box-sizing:border-box}html{background:var(--bg);scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;padding:0 0 calc(92px + env(safe-area-inset-bottom));font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer;border:0} .app{max-width:520px;margin:auto;min-height:100vh;padding:0 18px}
+header{display:flex;justify-content:space-between;align-items:center;padding:22px 0 18px}.brand{font-size:20px;font-weight:900;letter-spacing:2px}.brand span{color:var(--lime)}.avatar{width:39px;height:39px;border-radius:50%;background:#293022;color:var(--lime);display:grid;place-items:center;font-weight:800;border:1px solid #455038}
+.eyebrow{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:800}.greeting{font-size:29px;line-height:1.08;font-weight:850;letter-spacing:-1px;margin:8px 0 5px}.sub{color:var(--muted);font-size:13px}
+.hero{margin-top:22px;background:linear-gradient(135deg,#252d1e,#171c14 65%);border:1px solid #39442c;border-radius:27px;padding:21px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:190px;height:190px;border:1px solid #53663b;border-radius:50%;right:-70px;top:-65px;box-shadow:0 0 0 20px #a8d84d08,0 0 0 42px #a8d84d08}.hero .eyebrow{color:#c2d1ad}.hero-title{font-size:24px;font-weight:850;margin:9px 0 4px;letter-spacing:-.7px}.hero p{font-size:13px;color:#b4bca9;margin:0 0 18px}.primary{background:var(--lime);color:#11150b;padding:15px 18px;border-radius:15px;font-weight:850;width:100%;box-shadow:0 6px 20px #c6f32618}.primary:active{transform:scale(.985)}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:13px 16px;border-radius:14px;font-weight:750}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:27px 0 13px}.section-head h2{font-size:17px;margin:0;letter-spacing:-.3px}.link{background:none;color:var(--lime);font-size:12px;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px}.stat .label{font-size:11px;color:var(--muted);font-weight:700}.stat .value{font-size:25px;font-weight:850;margin-top:7px;letter-spacing:-.7px}.unit{font-size:12px;color:var(--muted);font-weight:650;margin-left:3px}.stat .delta{font-size:11px;color:var(--lime);margin-top:5px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px}.week{display:flex;justify-content:space-between;gap:6px;margin-top:14px}.day{flex:1;text-align:center;color:var(--muted);font-size:10px}.bar-wrap{height:78px;display:flex;align-items:end;justify-content:center;margin-bottom:8px}.bar{width:17px;border-radius:8px 8px 4px 4px;background:#353d2c;min-height:4px}.bar.active{background:var(--lime)}.day b{display:block;color:var(--text);font-size:10px;margin-top:6px}
+.run-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}.run-row:last-child{border:0;padding-bottom:0}.run-icon{width:42px;height:42px;border-radius:14px;background:#252d1e;display:grid;place-items:center;color:var(--lime);font-size:19px}.run-info{flex:1}.run-info strong{display:block;font-size:13px}.run-info small{color:var(--muted);font-size:11px}.run-distance{font-weight:850;font-size:15px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#11140ff2;backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:10}.nav-inner{width:100%;max-width:520px;display:flex;justify-content:space-around}.nav-btn{background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:750;padding:4px 12px}.nav-btn .ico{font-size:19px}.nav-btn.active{color:var(--lime)}
+.page{display:none}.page.active{display:block}
+.topline{display:flex;align-items:center;justify-content:space-between;margin:8px 0 18px}.topline h1{font-size:27px;margin:0;letter-spacing:-1px}
+.track-card{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:19px;margin-top:14px}.track-status{display:flex;justify-content:space-between;align-items:center}.pill{font-size:10px;color:var(--lime);background:#c6f36a16;border:1px solid #c6f36a3b;padding:6px 9px;border-radius:99px;font-weight:800}.timer{font-size:48px;font-weight:850;letter-spacing:-2px;text-align:center;margin:22px 0 4px}.timer-label{text-align:center;color:var(--muted);font-size:11px}.live-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}.live-metric{background:#20241e;border-radius:15px;padding:13px;text-align:center}.live-metric strong{font-size:25px;display:block}.live-metric small{color:var(--muted);font-size:10px}.track-actions{display:flex;gap:10px}.track-actions button{flex:1}.map-shell{position:relative;margin-top:16px;border:1px solid var(--line);border-radius:17px;overflow:hidden;background:#20241e}.map-box{height:270px;width:100%;background:#20241e}.map-caption{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;color:var(--muted);font-size:10px;background:#171a16}.map-caption strong{color:var(--lime);font-weight:800}.leaflet-container{font:inherit;background:#20241e}.leaflet-control-attribution{font-size:9px!important}.leaflet-control-zoom a{background:#171a16!important;color:#f3f5ef!important;border-color:#3a4035!important}.runner-dot{width:18px;height:18px;border-radius:50%;background:#c6f36a;border:4px solid #fff;box-shadow:0 0 0 7px #c6f36a44}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#171a16;color:#f3f5ef}.leaflet-popup-content{font-size:12px}
+.chart{height:150px;width:100%;display:block}.goal-row{display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px;font-size:12px}.progress{height:8px;border-radius:99px;background:#30352c;overflow:hidden}.progress span{display:block;height:100%;background:var(--lime);border-radius:99px}
+.field{margin:15px 0}.field label{display:block;font-size:11px;color:var(--muted);font-weight:750;margin-bottom:7px}.field input,.field select{width:100%;background:#20241e;border:1px solid var(--line);color:var(--text);padding:13px;border-radius:13px;font:inherit;outline:none}.field input:focus{border-color:var(--lime)}
+.empty{text-align:center;color:var(--muted);font-size:12px;padding:22px 5px}.notice{font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#e9f8d0;color:#18200f;padding:11px 16px;border-radius:12px;font-size:12px;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:20;white-space:nowrap}.toast.show{opacity:1}
+@media(min-width:600px){body{padding-top:12px}.app{border-left:1px solid #20241e;border-right:1px solid #20241e}.hero{margin-top:25px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand">P<span>A</span>CE<span>.</span></div><div class="avatar" id="avatar">A</div></header>
+<main>
+<section class="page active" id="home">
+<div class="eyebrow" id="todayLabel">DIN LØBEOVERSIGT</div><div class="greeting">Klar til at<br>komme ud?</div><div class="sub">Små skridt. Store fremskridt.</div>
+<div class="hero"><div class="eyebrow">DIT NÆSTE SKRIDT</div><div class="hero-title">Løbesko på. Verden venter.</div><p>Start en tur og følg dine fremskridt i realtid.</p><button class="primary" onclick="showPage('track')">Start løbetur&nbsp; →</button></div>
+<div class="section-head"><h2>Denne uge</h2><button class="link" onclick="showPage('stats')">Se statistik</button></div>
+<div class="stats">
+<div class="stat"><div class="label">DISTANCE</div><div class="value"><span id="weekKm">0.0</span><span class="unit">km</span></div><div class="delta">Denne uge</div></div>
+<div class="stat"><div class="label">LØBETURE</div><div class="value" id="weekRuns">0</div><div class="delta">Denne uge</div></div>
+<div class="stat"><div class="label">SAMLET TID</div><div class="value" id="weekTime">0<span class="unit">min</span></div><div class="delta">Denne uge</div></div>
+<div class="stat"><div class="label">BEDSTE TEMPO</div><div class="value" id="bestPace">—</div><div class="delta">min/km</div></div>
+</div>
+<div class="section-head"><h2>Din uge</h2><span class="eyebrow" id="weekTotal">0 KM I ALT</span></div>
+<div class="card"><div class="week" id="weekBars"></div></div>
+<div class="section-head"><h2>Seneste løbeture</h2><button class="link" onclick="showPage('history')">Se alle</button></div>
+<div class="card" id="recentRuns"><div class="empty">Dine løbeture vises her, når du har gennemført din første tur.</div></div>
+</section>
+
+<section class="page" id="track">
+<div class="topline"><h1>Ny løbetur</h1><span class="pill" id="gpsPill">GPS KLAR</span></div>
+<div class="track-card">
+<div class="track-status"><span class="eyebrow">LIVE TRACKING</span><span class="eyebrow" id="trackState">KLAR NÅR DU ER</span></div>
+<div class="timer" id="timer">00:00:00</div><div class="timer-label">TID</div>
+<div class="live-grid">
+<div class="live-metric"><strong id="distance">0.00</strong><small>DISTANCE · KM</small></div>
+<div class="live-metric"><strong id="pace">—</strong><small>TEMPO · MIN/KM</small></div>
+<div class="live-metric"><strong id="speed">0.0</strong><small>HASTIGHED · KM/T</small></div>
+<div class="live-metric"><strong id="calories">0</strong><small>EST. KALORIER</small></div>
+</div>
+<div class="track-actions"><button class="primary" id="startBtn" onclick="startRun()">Start</button><button class="secondary" id="pauseBtn" onclick="pauseRun()" disabled>Pause</button><button class="secondary" id="finishBtn" onclick="finishRun()" disabled>Afslut</button></div>
+<div class="map-shell"><div id="runMap" class="map-box" role="application" aria-label="Kort over din løberute"></div><div class="map-caption"><span id="mapText">Kort klar · Start turen for at registrere din rute</span><strong id="accuracyText">GPS ikke aktiv</strong></div></div>
+<p class="notice">GPS virker bedst udendørs. Tillad placering i browseren, når du bliver spurgt. Hold telefonen sikkert under løbeturen.</p>
+</div>
+</section>
+
+<section class="page" id="history">
+<div class="topline"><h1>Løbehistorik</h1><span class="pill" id="historyCount">0 TURE</span></div>
+<div class="card" id="allRuns"><div class="empty">Ingen løbeture endnu. Din første tur venter.</div></div>
+</section>
+
+<section class="page" id="stats">
+<div class="topline"><h1>Din udvikling</h1><span class="pill">OVERBLIK</span></div>
+<div class="stats">
+<div class="stat"><div class="label">TOTAL DISTANCE</div><div class="value" id="totalKm">0.0<span class="unit">km</span></div></div>
+<div class="stat"><div class="label">ANTAL TURE</div><div class="value" id="totalRuns">0</div></div>
+<div class="stat"><div class="label">TOTAL TID</div><div class="value" id="totalHours">0<span class="unit">t</span></div></div>
+<div class="stat"><div class="label">LÆNGSTE TUR</div><div class="value" id="longest">0.0<span class="unit">km</span></div></div>
+</div>
+<div class="section-head"><h2>Distance pr. løbetur</h2></div><div class="card"><canvas class="chart" id="distanceChart" width="600" height="220"></canvas><div class="notice">Grafen viser dine seneste løbeture.</div></div>
+<div class="section-head"><h2>Dit ugentlige mål</h2></div><div class="card"><div class="goal-row"><strong id="goalLabel">0.0 / 15 km</strong><span class="eyebrow" id="goalPercent">0%</span></div><div class="progress"><span id="goalBar" style="width:0%"></span></div><div class="notice">Et forslag til startmål. Du kan ændre det under profil.</div></div>
+</section>
+
+<section class="page" id="profile">
+<div class="topline"><h1>Profil & mål</h1><span class="pill">PACE MEMBER</span></div>
+<div class="card">
+<div class="field"><label>DIT NAVN</label><input id="nameInput" placeholder="Dit navn" maxlength="30"></div>
+<div class="field"><label>UGENTLIGT DISTANCEMÅL (KM)</label><input id="goalInput" type="number" min="1" max="200" value="15"></div>
+<button class="primary" onclick="saveProfile()">Gem ændringer</button>
+</div>
+<div class="section-head"><h2>App-indstillinger</h2></div><div class="card">
+<div class="run-row"><div class="run-icon">⌖</div><div class="run-info"><strong>GPS-tracking</strong><small>Bruger telefonens placering under løb</small></div></div>
+<div class="run-row"><div class="run-icon">▤</div><div class="run-info"><strong>Privatliv</strong><small>Dine løbeture gemmes kun lokalt i denne browser</small></div></div>
+<button class="secondary" style="width:100%;margin-top:15px" onclick="exportData()">Eksportér løbedata (JSON)</button>
+<button class="secondary" style="width:100%;margin-top:9px;color:var(--red)" onclick="clearData()">Slet alle løbedata</button>
+</div>
+<p class="notice">PACE er en lokal prototype. Data bliver på enheden og synkroniseres ikke automatisk mellem telefoner.</p>
+</section>
+</main>
+</div>
+<nav><div class="nav-inner">
+<button class="nav-btn active" data-page="home" onclick="showPage('home')"><span class="ico">⌂</span>Hjem</button>
+<button class="nav-btn" data-page="track" onclick="showPage('track')"><span class="ico">◎</span>Løb</button>
+<button class="nav-btn" data-page="history" onclick="showPage('history')"><span class="ico">◷</span>Historik</button>
+<button class="nav-btn" data-page="stats" onclick="showPage('stats')"><span class="ico">▥</span>Statistik</button>
+<button class="nav-btn" data-page="profile" onclick="showPage('profile')"><span class="ico">◉</span>Profil</button>
+</div></nav>
+<div class="toast" id="toast"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const $=id=>document.getElementById(id);
+let runs=JSON.parse(localStorage.getItem('pace_runs')||'[]');
+let profile=JSON.parse(localStorage.getItem('pace_profile')||'{"name":"Løber","goal":15}');
+let watchId=null, startedAt=0, elapsedBefore=0, timerHandle=null, active=false, paused=false, points=[], distanceM=0, lastPosition=null, movingSeconds=0;
+let runMap=null, routeLine=null, runnerMarker=null, firstFix=true;
+function initMap(){if(runMap||!window.L)return;runMap=L.map("runMap",{zoomControl:true,scrollWheelZoom:false}).setView([55.6761,12.5683],12);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(runMap);routeLine=L.polyline([],{color:"#b6e85d",weight:6,opacity:.95,lineCap:"round",lineJoin:"round"}).addTo(runMap);L.control.scale({imperial:false,position:"bottomleft"}).addTo(runMap);}
+function resetMap(){if(!runMap)return;routeLine.setLatLngs([]);if(runnerMarker){runMap.removeLayer(runnerMarker);runnerMarker=null;}firstFix=true;}
+function updateMapPosition(p){if(!runMap)initMap();if(!runMap)return;const latlng=[p.latitude,p.longitude];if(!runnerMarker){runnerMarker=L.marker(latlng,{icon:L.divIcon({className:"",html:"<div class=\"runner-dot\"></div>",iconSize:[18,18],iconAnchor:[9,9]})}).addTo(runMap).bindPopup("Din aktuelle position");}else runnerMarker.setLatLng(latlng);routeLine.addLatLng(latlng);if(firstFix){runMap.setView(latlng,17);firstFix=false;}else if(active&&!paused){runMap.panTo(latlng,{animate:true,duration:.5});}$("accuracyText").textContent=`Nøjagtighed ±${Math.round(p.accuracy)} m`; }
+const save=()=>localStorage.setItem('pace_runs',JSON.stringify(runs));
+const fmtTime=s=>{s=Math.max(0,Math.floor(s));return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':')};
+const paceText=sec=>{if(!isFinite(sec)||sec<=0)return '—';let m=Math.floor(sec/60),s=Math.floor(sec%60);return `${m}:${String(s).padStart(2,'0')}`};
+const todayStart=()=>{let d=new Date();d.setHours(0,0,0,0);return d.getTime()};
+const weekStart=()=>{let d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-(d.getDay()+6)%7);return d.getTime()};
+const kmOf=r=>Number(r.distance||0);
+function showToast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
+function showPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(p).classList.add('active');document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.page===p));if(p==='stats')drawChart();if(p==='track'){initMap();setTimeout(()=>runMap&&runMap.invalidateSize(),120)}window.scrollTo(0,0)}
+function haversine(a,b){const R=6371000,rad=x=>x*Math.PI/180,dLat=rad(b.latitude-a.latitude),dLon=rad(b.longitude-a.longitude),x=Math.sin(dLat/2)**2+Math.cos(rad(a.latitude))*Math.cos(rad(b.latitude))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function elapsed(){return elapsedBefore+(active&&!paused?(Date.now()-startedAt)/1000:0)}
+function updateLive(){let t=elapsed(),km=distanceM/1000,pace=km>0.02?t/km:0,speed=t>0?km/(t/3600):0;$('timer').textContent=fmtTime(t);$('distance').textContent=km.toFixed(2);$('pace').textContent=paceText(pace);$('speed').textContent=speed.toFixed(1);$('calories').textContent=Math.round(km*profile.weight*0.9||km*65);$('trackState').textContent=paused?'PAUSET':active?'LØBETUR I GANG':'KLAR NÅR DU ER'}
+function startRun(){if(active&&!paused)return;if(!active){active=true;paused=false;startedAt=Date.now();elapsedBefore=0;distanceM=0;points=[];lastPosition=null;movingSeconds=0;resetMap()}
+else{paused=false;startedAt=Date.now()}
+$('startBtn').textContent='I GANG';$('startBtn').disabled=true;$('pauseBtn').disabled=false;$('finishBtn').disabled=false;$('gpsPill').textContent='SØGER GPS';$('mapText').textContent='Venter på GPS-position…';$('accuracyText').textContent='Finder position';initMap();setTimeout(()=>runMap&&runMap.invalidateSize(),100);timerHandle=setInterval(updateLive,500);
+if(!navigator.geolocation){showToast('GPS kræver en browser med placeringstilladelse');$('gpsPill').textContent='GPS IKKE TILGÆNGELIG';$('mapText').textContent='GPS understøttes ikke i denne browser';return}
+watchId=navigator.geolocation.watchPosition(pos=>{if(!active||paused)return;let c=pos.coords;if(c.accuracy>60)return;let p={latitude:c.latitude,longitude:c.longitude,time:pos.timestamp,accuracy:c.accuracy};if(lastPosition){let d=haversine(lastPosition,p);let dt=(p.time-lastPosition.time)/1000;if(d>2&&d<100&&dt>0&&d/dt<8){distanceM+=d;points.push([p.latitude,p.longitude]);$('mapText').textContent=`Rute registreret · ${points.length} punkter`}}else{points.push([p.latitude,p.longitude]);$('mapText').textContent='Din position er fundet · Ruten starter her'}lastPosition=p;updateMapPosition(p);$('gpsPill').textContent='GPS AKTIV';updateLive()},err=>{$('gpsPill').textContent='GPS-FEJL';$('mapText').textContent=err.code===1?'Placeringstilladelse blev afvist':'Kunne ikke hente GPS-position';showToast('GPS kunne ikke startes: '+err.message)},{enableHighAccuracy:true,maximumAge:1000,timeout:15000})}
+function pauseRun(){if(!active)return;if(!paused){elapsedBefore=elapsed();paused=true;if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null;$('startBtn').disabled=false;$('startBtn').textContent='Fortsæt';$('pauseBtn').textContent='Fortsæt';$('pauseBtn').disabled=true;$('gpsPill').textContent='PAUSET';$('mapText').textContent='Løbeturen er sat på pause'}else startRun();updateLive()}
+function finishRun(){if(!active)return;let t=elapsed(),km=distanceM/1000;active=false;paused=false;if(watchId!==null)navigator.geolocation.clearWatch(watchId);clearInterval(timerHandle);watchId=null;let r={id:Date.now(),date:new Date().toISOString(),distance:km,duration:t,pace:km>0?t/km:0,points:points.length,route:points.slice()};if(km>0.005&&t>0){runs.unshift(r);save();showToast('Løbetur gemt — godt arbejde!')}else showToast('Turen var for kort til at gemme');$('startBtn').disabled=false;$('startBtn').textContent='Start';$('pauseBtn').disabled=true;$('pauseBtn').textContent='Pause';$('finishBtn').disabled=true;$('gpsPill').textContent='GPS KLAR';$('trackState').textContent='TUR AFSLUTTET';$('mapText').textContent='Tur afsluttet · Ruten er gemt i løbehistorikken';$('accuracyText').textContent='GPS afsluttet';updateLive();renderAll();showPage('history')}
+function dateLabel(iso){return new Date(iso).toLocaleDateString('da-DK',{day:'numeric',month:'short'})}
+function runMarkup(r){return `<div class="run-row"><div class="run-icon">↗</div><div class="run-info"><strong>${dateLabel(r.date)} · Løbetur</strong><small>${fmtTime(r.duration)} · ${paceText(r.pace)} min/km</small></div><div class="run-distance">${kmOf(r).toFixed(2)} <span class="unit">km</span></div></div>`}
+function renderAll(){let week=runs.filter(r=>new Date(r.date).getTime()>=weekStart()),wkKm=week.reduce((a,r)=>a+kmOf(r),0),wkTime=week.reduce((a,r)=>a+r.duration,0),best=week.filter(r=>r.pace>0).reduce((a,r)=>Math.min(a,r.pace),Infinity);$('weekKm').textContent=wkKm.toFixed(1);$('weekRuns').textContent=week.length;$('weekTime').innerHTML=Math.round(wkTime/60)+'<span class="unit">min</span>';$('bestPace').textContent=isFinite(best)?paceText(best):'—';$('weekTotal').textContent=wkKm.toFixed(1)+' KM I ALT';
+$('recentRuns').innerHTML=runs.length?runs.slice(0,3).map(runMarkup).join(''):'<div class="empty">Dine løbeture vises her, når du har gennemført din første tur.</div>';$('allRuns').innerHTML=runs.length?runs.map(runMarkup).join(''):'<div class="empty">Ingen løbeture endnu. Din første tur venter.</div>';$('historyCount').textContent=runs.length+' TURE';
+let days=['Man','Tir','Ons','Tor','Fre','Lør','Søn'],values=days.map((_,i)=>{let d=new Date(weekStart()+i*86400000);return week.filter(r=>{let x=new Date(r.date);return x.toDateString()===d.toDateString()}).reduce((a,r)=>a+kmOf(r),0)}),max=Math.max(4,...values);
+$('weekBars').innerHTML=days.map((d,i)=>`<div class="day"><div class="bar-wrap"><div class="bar ${values[i]>0?'active':''}" style="height:${Math.max(4,values[i]/max*68)}px"></div></div>${d}<b>${values[i]?values[i].toFixed(1):'–'}</b></div>`).join('');
+let total=runs.reduce((a,r)=>a+kmOf(r),0),duration=runs.reduce((a,r)=>a+r.duration,0),longest=runs.reduce((a,r)=>Math.max(a,kmOf(r)),0),goal=Number(profile.goal)||15,pct=Math.min(100,wkKm/goal*100);$('totalKm').innerHTML=total.toFixed(1)+'<span class="unit">km</span>';$('totalRuns').textContent=runs.length;$('totalHours').innerHTML=(duration/3600).toFixed(1)+'<span class="unit">t</span>';$('longest').innerHTML=longest.toFixed(1)+'<span class="unit">km</span>';$('goalLabel').textContent=wkKm.toFixed(1)+' / '+goal+' km';$('goalPercent').textContent=Math.round(pct)+'%';$('goalBar').style.width=pct+'%';
+$('nameInput').value=profile.name||'';$('goalInput').value=goal;$('avatar').textContent=(profile.name||'A').trim().charAt(0).toUpperCase();$('greetingName');}
+function drawChart(){let c=$('distanceChart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);let data=runs.slice(0,8).reverse().map(r=>kmOf(r)),max=Math.max(1,...data);ctx.strokeStyle='#353d2c';ctx.lineWidth=1;for(let i=1;i<=3;i++){let y=h-i*h/4;ctx.beginPath();ctx.moveTo(25,y);ctx.lineTo(w-10,y);ctx.stroke()}if(!data.length){ctx.fillStyle='#92998d';ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillText('Gennemfør en tur for at se din graf',w/2,h/2);return}let gap=18,bw=Math.min(42,(w-50)/data.length-gap),usable=w-45;data.forEach((v,i)=>{let x=30+i*(usable/data.length)+(usable/data.length-bw)/2,bh=v/max*(h-35);ctx.fillStyle='#c6f36a';ctx.beginPath();ctx.roundRect(x,h-bh-12,bw,bh,7);ctx.fill();ctx.fillStyle='#92998d';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(v.toFixed(1),x+bw/2,h-2)})}
+function saveProfile(){profile.name=$('nameInput').value.trim()||'Løber';profile.goal=Math.max(1,Math.min(200,Number($('goalInput').value)||15));localStorage.setItem('pace_profile',JSON.stringify(profile));renderAll();showToast('Profil gemt')}
+function exportData(){let blob=new Blob([JSON.stringify({profile,runs},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='pace-loebedata.json';a.click();URL.revokeObjectURL(url)}
+function clearData(){if(confirm('Er du sikker på, at du vil slette alle gemte løbeture?')){runs=[];save();renderAll();showToast('Løbedata slettet')}}
+$('todayLabel').textContent=new Date().toLocaleDateString('da-DK',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();renderAll();updateLive();initMap();
+</script>
+</body>
+</html>
